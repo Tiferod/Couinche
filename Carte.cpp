@@ -207,13 +207,13 @@ bool comparaisonParId(Carte c1, Carte c2)
             id2 = idToOrdre(c2.getId(), true);
         }
     }
-    return (id1>id2);
+    return (id1<id2);
 }
 bool operator==(Carte const& a, Carte const& b)
 {
     return (a.getId() == b.getId() && a.getValeur() == b.getValeur() && a.getCouleur() == b.getCouleur() && a.getNom() == b.getNom());
 }
-bool operator>(Carte const& a, Carte const& b)//Attention ! Pour des cartes, a > b n'implique pas b > a ! L'ordre des cartes est important lorsque des cartes de couleurs différentes
+bool operator>(Carte const& a, Carte const& b)//Attention ! Pour des cartes, a > b n'implique pas b < a ! L'ordre des cartes est important lorsque des cartes de couleurs différentes
 {                                             //sont impliquées. Par exemple, un huit de pique posé en premier bat un as de pique posé en second, et vice-versa si l'ordre est inversé.
     if (a.getCouleur() != b.getCouleur())     //On considère ici que la carte déjà posée est à droite de l'inégalité. Elle aura donc "l'avantage".
     {
@@ -221,12 +221,12 @@ bool operator>(Carte const& a, Carte const& b)//Attention ! Pour des cartes, a >
     }
     else
     {
-        return ((idToOrdre(a.getId(), a.getCouleur() == a.getCouleurAnnoncee())) > (idToOrdre(b.getId(), b.getCouleur() == b.getCouleurAnnoncee())));
+        return ((idToOrdre(a.getId(), a.getCouleur() == a.getCouleurAnnoncee() || a.getCouleurAnnoncee() == 5)) > (idToOrdre(b.getId(), b.getCouleur() == b.getCouleurAnnoncee() || b.getCouleurAnnoncee() == 5)));
     }
 }
 bool operator<(Carte const& a, Carte const& b)
 {
-    return !(a<b);
+    return !(a>b);
 }
 ostream& operator<<(ostream& os, const Carte& carte)
 {

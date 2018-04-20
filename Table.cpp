@@ -317,7 +317,7 @@ void Table::ramasserPli()
 }
 Pli Table::dernierPli() const
 {
-
+	return Pli();
 }
 void Table::belote(int joueur)
 {
