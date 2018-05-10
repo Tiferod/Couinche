@@ -1,6 +1,5 @@
 #include <iostream>
-#include <stdlib.h>
-#include <time.h>
+#include <cstdlib>
 #include <algorithm>
 
 #include "Table.h"
@@ -54,7 +53,7 @@ void Table::distribution()
         cout<< endl;
     }
 }
-void Table::annonces()//ToDo : Surcoinche
+void Table::annonces()
 {
     joueurActuel--;
     int dernierJoueurAnnonceur = -1;
@@ -71,58 +70,68 @@ void Table::annonces()//ToDo : Surcoinche
         pMontant = nMontant;
         while (!(annonce == 7 || (annonce == 6 && nMontant != 0 && joueurActuel%2 != dernierJoueurAnnonceur%2) || (nMontant > pMontant && (nMontant <= 160 || nMontant == 250) && nMontant % 10 == 0)))
         {
-            cout<< endl << "Annonce du Joueur " << joueurActuel << endl;
-            cout<<"Couleur (Passe, Carreau, Coeur, Pique, Trefle, SansAtout, ToutAtout, Coinche) : ";
+            cout << endl << "Annonce du Joueur " << joueurActuel << endl;
+            cout <<"Couleur (Passe, Carreau, Coeur, Pique, Trefle, SansAtout, ToutAtout, Coinche) : ";
             cin>>strAnnonce;
-            if (strAnnonce == "Passe")
+			annonce = annonceToId(strAnnonce);
+			if (annonce == -1)
+			{
+				cout << strAnnonce << " n'est pas une annonce valide." << endl;
+			}
+            else if (annonce == 7)
             {
-                cout<<"Le joueur " << joueurActuel << " a passe." << endl;
+				nMontant = pMontant;
+                cout << endl << "Le joueur " << joueurActuel << " a passe." << endl;
                 cPasse++;
             }
-            else if (strAnnonce == "Coinche")
+            else if (annonce == 6)
             {
+				nMontant = pMontant;
                 if (nMontant == 0)
                 {
-                    cout<<"Vous ne pouvez pas coincher si aucun joueur n'a fait une annonce." << endl;
+                    cout << "Vous ne pouvez pas coincher si aucun joueur n'a fait une annonce." << endl;
                 }
                 else if (joueurActuel%2 == dernierJoueurAnnonceur%2)
                 {
-                    cout<<"Vous ne pouvez pas coincher votre partenaire." << endl;
+                    cout << "Vous ne pouvez pas coincher votre partenaire." << endl;
                 }
                 else
                 {
-                    cout<<"Le joueur " << joueurActuel << " a coinche l'annonce du joueur " << dernierJoueurAnnonceur << " qui etait : " << nMontant << " " << strDerniereAnnonce  << endl;
+                    cout<< endl << "Le joueur " << joueurActuel << " a coinche l'annonce du joueur " << dernierJoueurAnnonceur << " qui etait : " << nMontant << " " << strDerniereAnnonce  << endl;
                 }
             }
             else
             {
-                cout<<"Montant : ";
-                cin>>nMontant;
+                cout << "Montant : ";
+				while (!(cin >> nMontant)) {
+					cin.clear();
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					cout << "Ce montant est invalide. Reessayez." << endl << "Montant : ";
+				}
                 if (nMontant < 80)
                 {
-                    cout<<"Le nombre de points annonces doit être superieur a 80 points." << endl;
+                    cout << "Le nombre de points annonces doit etre superieur a 80 points." << endl;
                 }
                 else if (nMontant > 160 && nMontant != 250)
                 {
-                    cout<<"Le nombre de points annonces doit être inferieur a 160 points, a l'exception d'un capot (250)." << endl;
+                    cout << "Le nombre de points annonces doit etre inferieur a 160 points, a l'exception d'un capot (250)." << endl;
                 }
                 else if (nMontant <= pMontant)
                 {
-                    cout<<"Le nombre de points annonces doit être superieur a celui de l'annonce precedente." << endl;
+                    cout << "Le nombre de points annonces doit etre superieur a celui de l'annonce precedente." << endl;
                 }
                 else if (nMontant % 10 != 0)
                 {
-                    cout<<"Le nombre de points annonces doit être un multiple de 10 (80, 90, 100, etc)." << endl;
+                    cout << "Le nombre de points annonces doit etre un multiple de 10 (80, 90, 100, etc)." << endl;
                 }
                 else
                 {
                     cPasse = 0;
                     dernierJoueurAnnonceur = joueurActuel;
                     strDerniereAnnonce = strAnnonce;
-                    cout<<"Le joueur " << joueurActuel << " a annonce : " << nMontant << " " << strAnnonce << endl;
+                    cout << endl << "Le joueur " << joueurActuel << " a annonce : " << nMontant << " " << strAnnonce << endl;
                 }
             }
-            annonce = annonceToId(strAnnonce);
         }
     }
     if (cPasse == 3)
@@ -143,7 +152,28 @@ void Table::annonces()//ToDo : Surcoinche
         couleurAnnoncee = annonceToId(strDerniereAnnonce);
         montantAnnonce = nMontant;
         coinche = 1;
-        cout<< endl << "Le joueur " << joueurActuel << " a coinche l'annonce du joueur " << joueurPreneur << " qui etait : " << montantAnnonce << " " << strDerniereAnnonce << endl;
+		joueurActuel = (joueurActuel + 1) % 4;
+		while (strAnnonce != "oui" && cPasse < 2)
+		{
+			strAnnonce = "";
+			while (strAnnonce != "oui" && strAnnonce != "non")
+			{
+				cout << endl << "Le joueur " << joueurActuel << " veut-il surcoincher ?";
+				cin >> strAnnonce;
+				std::transform(strAnnonce.begin(), strAnnonce.end(), strAnnonce.begin(), ::tolower);
+			}
+			if (strAnnonce == "oui")
+			{
+				cout << "Le joueur " << joueurActuel << " a surcoinche." << endl;
+				coinche = 2;
+			}
+			else
+			{
+				cout << "Le joueur " << joueurActuel << " n'a pas surcoinche." << endl;
+				cPasse++;
+				joueurActuel = (joueurActuel + 2) % 4;
+			}
+		}
     }
     for (int joueur = 0 ; joueur < 4 ; joueur++)
     {
@@ -167,7 +197,7 @@ void Table::jouer()
             do
             {
                 cin>>posCarteJouee;
-            }while(!jouerCarte(joueurActuel, jeux[joueurActuel][posCarteJouee-1]));
+            } while(posCarteJouee < 1 || posCarteJouee > jeux[joueurActuel].size() || !jouerCarte(joueurActuel, jeux[joueurActuel][posCarteJouee-1]));
             joueurActuel = (joueurActuel + 1) % 4;
         }
         ramasserPli();
@@ -315,18 +345,33 @@ void Table::ramasserPli()
     pliEnCours.vider();
     pliEnCours.setJoueurDebut(joueurActuel);
 }
-Pli Table::dernierPli() const
-{
-	return Pli();
-}
-void Table::belote(int joueur)
-{
 
-}
-void Table::rebelote(int joueur)
+void Table::finPartie()
 {
-
+	cout << "La partie est terminée." << endl;
+	cout << "L'équipe " << joueurPreneur % 2 << " avait annoncé : " << montantAnnonce << " " << couleurAnnoncee << "." << endl;
+	vector<int> score (2, 0);
+	for (int i = 0; i < plisEquipe0.size(); i++)
+	{
+		score[0] += plisEquipe0[i].getPoints();
+	}
+	for (int i = 0; i < plisEquipe1.size(); i++)
+	{
+		score[1] += plisEquipe1[i].getPoints();
+	}
+	cout << "Les scores sont les suivants : Equipe 0 : " << score[0] << " | Equipe 1 : " << score[1] << endl;
+	if (score[joueurPreneur % 2] >= montantAnnonce)
+	{
+		cout << "L'équipe " << joueurPreneur % 2 << " remporte donc son contrat." << endl;
+	}
+	else
+	{
+		cout << "L'équipe " << joueurPreneur % 2 << " ne remporte donc pas son contrat." << endl;
+	}
+	string str;
+	cin >> str;
 }
+
 bool Table::possedeAtoutSuperieur(int joueur, Carte atout) const
 {
     for (int i = 0 ; i < jeux[joueur].size() ; i++)
@@ -352,37 +397,38 @@ bool Table::possedeCouleur(int joueur, int couleur) const
 
 int annonceToId(string str)
 {
-    if (str == "Carreau")
+	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    if (str == "carreau")
     {
         return 0;
     }
-    else if (str == "Coeur")
+    else if (str == "coeur")
     {
         return 1;
     }
-    else if (str == "Pique")
+    else if (str == "pique")
     {
         return 2;
     }
-    else if (str == "Trefle")
+    else if (str == "trefle")
     {
         return 3;
     }
-    else if (str == "SansAtout")
+    else if (str == "sansatout")
     {
         return 4;
     }
-    else if (str == "ToutAtout")
+    else if (str == "toutatout")
     {
         return 5;
     }
-    else if (str == "Coinche")
+    else if (str == "coinche")
     {
         return 6;
     }
-    else if (str == "Passe")
-    {
-        return 7;
-    }
+	else if (str == "passe")
+	{
+		return 7;
+	}
     return -1;
 }

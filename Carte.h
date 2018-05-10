@@ -15,6 +15,7 @@ public:
     int getValeur() const;
     int getCouleur() const;
     std::string getNom() const;
+	int getPoints() const;
     int getCouleurAnnoncee() const;
     int* getPointeur() const;
     Carte setCouleurAnnoncee(int& couleur);
@@ -24,6 +25,7 @@ private:
     int valeur;
     int couleur;
     std::string nom;
+	int points;
 
     int *couleurAnnoncee;
 };

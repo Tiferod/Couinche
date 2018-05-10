@@ -16,6 +16,7 @@ public:
     Pli setJoueurDebut(int joueur);
     int getTaille() const;
     std::vector<Carte> getCartes() const;
+	int getPoints() const;
     int getCouleurDemandee() const;
     Carte getDerniereCarte() const;
     Carte getCarteMaitre() const;
@@ -24,6 +25,7 @@ public:
 private:
     int joueurDebut;
     std::vector<Carte> cartes;
+	int points;
 };
 
 std::ostream& operator<<(std::ostream& os, const Pli& pli);

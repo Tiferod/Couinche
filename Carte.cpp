@@ -18,26 +18,27 @@ Carte::Carte(int id1)
             nom = "Joker";
             valeur = -1;
             couleur = -1;
+			points = -1;
         }
         else
         {
             valeur = id % 8;
             switch(valeur) {
-                case 0 : nom = "7 ";
+				case 0: nom = "7 "; points = 0;
                 break;
-                case 1 : nom = "8 ";
+                case 1 : nom = "8 "; points = 0;
                 break;
-                case 2 : nom = "9 ";
+                case 2 : nom = "9 "; points = 0;
                 break;
-                case 3 : nom = "10 ";
+                case 3 : nom = "10 "; points = 10;
                 break;
-                case 4 : nom = "V ";
+                case 4 : nom = "V "; points = 2;
                 break;
-                case 5 : nom = "D ";
+                case 5 : nom = "D "; points = 3;
                 break;
-                case 6 : nom = "R ";
+                case 6 : nom = "R "; points = 4;
                 break;
-                case 7 : nom = "A ";
+                case 7 : nom = "A "; points = 11;
                 break;
             }
             couleur = id / 8;
@@ -88,34 +89,42 @@ Carte::Carte(std::string nom1) : nom(nom1)
         if (strValeur == "7")
         {
             valeur = 0;
+			points = 0;
         }
         else if (strValeur == "8")
         {
             valeur = 1;
+			points = 0;
         }
         else if (strValeur == "9")
         {
             valeur = 2;
+			points = 0;
         }
         else if (strValeur == "10")
         {
             valeur = 3;
+			points = 10;
         }
         else if (strValeur == "V")
         {
             valeur = 4;
+			points = 2;
         }
         else if (strValeur == "D")
         {
             valeur = 5;
+			points = 3;
         }
         else if (strValeur == "R")
         {
             valeur = 6;
+			points = 4;
         }
         else if (strValeur == "A")
         {
             valeur = 7;
+			points = 11;
         }
         else
         {
@@ -162,6 +171,10 @@ string Carte::getNom() const
 {
     return nom;
 }
+int Carte::getPoints() const
+{
+	return points;
+}
 int Carte::getCouleurAnnoncee() const
 {
     return *couleurAnnoncee;
@@ -173,6 +186,21 @@ int* Carte::getPointeur() const
 Carte Carte::setCouleurAnnoncee(int& couleur)
 {
     couleurAnnoncee = &couleur;
+	if (couleur == this->couleur || couleur == 5)
+	{
+		if (valeur == 2)
+		{
+			points = 14;
+		}
+		else if (valeur == 3)
+		{
+			points = 20;
+		}
+	}
+	else if (couleur == 4 && valeur == 7)
+	{
+		points = 19;
+	}
     return *this;
 }
 
@@ -207,7 +235,7 @@ bool comparaisonParId(Carte c1, Carte c2)
             id2 = idToOrdre(c2.getId(), true);
         }
     }
-    return (id1<id2);
+    return (id1>id2);
 }
 bool operator==(Carte const& a, Carte const& b)
 {

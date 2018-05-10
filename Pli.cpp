@@ -30,12 +30,14 @@ Pli Pli::addCarte(Carte carte)
     else
     {
         cartes.push_back(carte);
+		points += carte.getPoints();
     }
     return *this;
 }
 Pli Pli::vider()
 {
     cartes.clear();
+	points = 0;
     return *this;
 }
 Pli Pli::setJoueurDebut(int joueur)
@@ -50,6 +52,10 @@ int Pli::getTaille() const
 vector<Carte> Pli::getCartes() const
 {
     return cartes;
+}
+int Pli::getPoints() const
+{
+	return points;
 }
 int Pli::getCouleurDemandee() const
 {

@@ -11,15 +11,12 @@ public:
 
     void partieSuivante();
     void distribution();
-    void trierJeux();
     void annonces();
     void jouer();
     bool testCarte(int joueur, Carte carte, bool messageDErreur = true) const;
     bool jouerCarte(int joueur, Carte carte);
     void ramasserPli();
-    Pli dernierPli() const;
-    void belote(int joueur);
-    void rebelote(int joueur);
+	void finPartie();
 
 private:
     bool possedeAtoutSuperieur(int joueur, Carte atout) const;
