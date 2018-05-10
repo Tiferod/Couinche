@@ -78,4 +78,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-vs/
+.vs/
+obj/
+Debug/
+bin/
