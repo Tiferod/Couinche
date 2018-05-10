@@ -9,8 +9,9 @@ using namespace std;
 Table::Table()
 {
     joueurDistribuant = rand() % 4;
-    scoreEquipe0 = 0;
-    scoreEquipe1 = 0;
+    scoreEquipe[0] = 0;
+    scoreEquipe[1] = 0;
+	litige = 0;
     partieSuivante();
 }
 
@@ -22,6 +23,7 @@ void Table::partieSuivante()
     couleurAnnoncee = 4;
     montantAnnonce = -1;
     coinche = -1;
+	belote = -1;
     for (int i = 0 ; i < 4 ; i++)
     {
         jeux[i].clear();
@@ -175,10 +177,19 @@ void Table::annonces()
 			}
 		}
     }
-    for (int joueur = 0 ; joueur < 4 ; joueur++)
-    {
-        sort(jeux[joueur].begin(), jeux[joueur].end(), comparaisonParId);
-    }
+	for (int joueur = 0; joueur < 4; joueur++)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			jeux[joueur][i].setCouleurAnnoncee(couleurAnnoncee);
+		}
+		sort(jeux[joueur].begin(), jeux[joueur].end(), comparaisonParId);
+		if ((find(jeux[joueur].begin(), jeux[joueur].end(), Carte(5, couleurAnnoncee)) != jeux[joueur].end()) && (find(jeux[joueur].begin(), jeux[joueur].end(), Carte(6, couleurAnnoncee)) != jeux[joueur].end()))
+		{
+			belote = joueur;
+		}
+	}
+
 }
 void Table::jouer()
 {
@@ -202,7 +213,6 @@ void Table::jouer()
         }
         ramasserPli();
     }
-
 }
 bool Table::testCarte(int joueur, Carte carte, bool messageDErreur) const
 {
@@ -305,8 +315,34 @@ bool Table::jouerCarte(int joueur, Carte carte)
             {
                 if (testCarte(joueur, carte))
                 {
-                    cout<<"Le joueur " << joueur << " a joue : " << pos->getNom() << endl << endl;
-                    jeux[joueur].erase(pos);
+                    cout <<"Le joueur " << joueur << " a joue : " << pos->getNom() << ".";
+					jeux[joueur].erase(pos);
+					if (joueur == belote && carte.isAtout())
+					{
+						if (carte.getValeur() == 5)
+						{
+							if (find(jeux[joueur].begin(), jeux[joueur].end(), Carte(6, carte.getCouleur())) == jeux[joueur].end())
+							{
+								cout << " Rebelote.";
+							}
+							else
+							{
+								cout << " Belote.";
+							}
+						}
+						else if (carte.getValeur() == 6)
+						{
+							if (find(jeux[joueur].begin(), jeux[joueur].end(), Carte(5, carte.getCouleur())) == jeux[joueur].end())
+							{
+								cout << " Rebelote.";
+							}
+							else
+							{
+								cout << " Belote.";
+							}
+						}
+					}
+					cout << endl << endl;
                     pliEnCours.addCarte(carte);
                     return true;
                 }
@@ -331,8 +367,12 @@ bool Table::jouerCarte(int joueur, Carte carte)
 
 void Table::ramasserPli()
 {
-    cout<<pliEnCours << endl;
-    cout<<"Le joueur " << pliEnCours.getJoueurMaitre() << " remporte le pli." << endl << endl;
+    cout << pliEnCours << endl;
+    cout << "Le joueur " << pliEnCours.getJoueurMaitre() << " remporte le pli." << endl << endl;
+	if (!jeux[0].size())
+	{
+		pliEnCours.setDixDeDer();
+	}
     if (pliEnCours.getJoueurMaitre()%2)
     {
         plisEquipe1.push_back(pliEnCours);
@@ -346,30 +386,109 @@ void Table::ramasserPli()
     pliEnCours.setJoueurDebut(joueurActuel);
 }
 
-void Table::finPartie()
+int Table::finPartie()
 {
-	cout << "La partie est terminée." << endl;
-	cout << "L'équipe " << joueurPreneur % 2 << " avait annoncé : " << montantAnnonce << " " << couleurAnnoncee << "." << endl;
-	vector<int> score (2, 0);
-	for (int i = 0; i < plisEquipe0.size(); i++)
+	cout << "La partie est terminee." << endl;
+	cout << "L'equipe " << joueurPreneur % 2 << " avait annonce : " << montantAnnonce << " " << idToAnnonce(couleurAnnoncee) << "." << endl;
+	int score[2] = {0, 0};
+	if (coinche == 1)
 	{
-		score[0] += plisEquipe0[i].getPoints();
+		cout << "L'annonce avait ete coinchee." << endl;
 	}
-	for (int i = 0; i < plisEquipe1.size(); i++)
+	else if (coinche == 2)
 	{
-		score[1] += plisEquipe1[i].getPoints();
+		cout << "L'annonce avait ete coinchee et surcoinchee." << endl;
 	}
-	cout << "Les scores sont les suivants : Equipe 0 : " << score[0] << " | Equipe 1 : " << score[1] << endl;
-	if (score[joueurPreneur % 2] >= montantAnnonce)
+	if (belote > -1)
 	{
-		cout << "L'équipe " << joueurPreneur % 2 << " remporte donc son contrat." << endl;
+		cout << "L'equipe " << belote % 2 << " a la belote." << endl;
+	}
+	if (montantAnnonce == 250)
+	{
+		if (joueurPreneur % 2)
+		{
+			if (plisEquipe0.size())
+			{
+				cout << "L'equipe " << joueurPreneur % 2 << " n'a realise que " << plisEquipe1.size() << " des 8 plis." << endl;
+				cout << "Elle n'a donc pas rempli son contrat." << endl;
+				score[joueurPreneur % 2] = 0;
+				score[(joueurPreneur + 1) % 2] = pointsCoinche(false) + 20 * (belote > -1) + litige;
+			}
+			else
+			{
+				cout << "L'equipe " << joueurPreneur % 2 << " a realise tous les plis." << endl;
+				cout << "Elle a donc rempli son contrat." << endl;
+				score[joueurPreneur % 2] = pointsCoinche(true) + 20 * (belote > -1) + litige;
+				score[(joueurPreneur + 1) % 2] = 0;
+			}
+		}
+		else
+		{
+			if (plisEquipe1.size())
+			{
+				cout << "L'equipe " << joueurPreneur % 2 << " n'a realise que " << plisEquipe0.size() << " des 8 plis." << endl;
+				cout << "Elle n'a donc pas rempli son contrat." << endl;
+				score[joueurPreneur % 2] = 0;
+				score[(joueurPreneur + 1) % 2] = pointsCoinche(false) + 20 * (belote > -1) + litige;
+			}
+			else
+			{
+				cout << "L'equipe " << joueurPreneur % 2 << " a realise tous les plis." << endl;
+				cout << "Elle a donc rempli son contrat." << endl;
+				score[joueurPreneur % 2] = pointsCoinche(true) + 20 * (belote > -1) + litige;
+				score[(joueurPreneur + 1) % 2] = 0;
+			}
+		}
+		litige = 0;
 	}
 	else
 	{
-		cout << "L'équipe " << joueurPreneur % 2 << " ne remporte donc pas son contrat." << endl;
+		cout << "Score 0 : " << score[0] << " | ";
+		for (int i = 0; i < plisEquipe0.size(); i++)
+		{
+			score[0] += plisEquipe0[i].getPoints();
+			cout << "Score 0 : " << score[0] << " | ";
+		}
+		cout << endl;
+		cout << "Score 1 : " << score[1] << " | ";
+		for (int i = 0; i < plisEquipe1.size(); i++)
+		{
+			score[1] += plisEquipe1[i].getPoints();
+			cout << "Score 1 : " << score[1] << " | ";
+		}
+		cout << endl;
+		score[0] = static_cast<int>(score[0] * (1 + (couleurAnnoncee == 5) * 96.0 / 162.0) + 0.5) + 20 * (belote % 2 == 0);
+		score[1] = static_cast<int>(score[1] * (1 + (couleurAnnoncee == 5) * 96.0 / 162.0) + 0.5) + 20 * (belote % 2 == 1);
+		cout << "Les scores sont les suivants : Equipe 0 : " << score[0] << " | Equipe 1 : " << score[1] << endl;
+		if (score[joueurPreneur % 2] >= montantAnnonce && score[joueurPreneur % 2] > 81)
+		{
+			cout << "L'equipe " << joueurPreneur % 2 << " a donc rempli son contrat." << endl;
+			score[joueurPreneur % 2] = pointsCoinche(true) + litige;
+			score[(joueurPreneur + 1) % 2] = static_cast<int>(score[(joueurPreneur + 1) % 2] / 10.0 + 0.5) * 10 * (coinche == 0);
+			litige = 0;
+		}
+		else
+		{
+			if (montantAnnonce == 80 && score[joueurPreneur % 2] == 81)
+			{
+				cout << "Litige. L'equipe " << joueurPreneur % 2 << " ne marque pas de points. L'equipe qui remportera la partie suivante les marquera." << endl;
+				score[joueurPreneur % 2] = 0;
+				score[(joueurPreneur + 1) % 2] = 80 * (coinche == 0) + 20 * ((belote % 2) == (joueurPreneur + 1 % 2));
+				litige += pointsCoinche(true) + 20 * ((belote % 2) == (joueurPreneur % 2));
+			}
+			else
+			{
+				cout << "L'equipe " << joueurPreneur % 2 << " n'a donc pas rempli son contrat." << endl;
+				score[joueurPreneur % 2] = 0;
+				score[(joueurPreneur + 1) % 2] = pointsCoinche(false) + 20 * (belote > -1) + litige;
+				litige = 0;
+			}
+		}
 	}
-	string str;
-	cin >> str;
+	scoreEquipe[0] += score[0];
+	scoreEquipe[1] += score[1];
+	cout << "L'equipe 0 marque " << score[0] << " | L'equipe 1 marque " << score[1] << endl;
+	return max(score[0], score[1]);
 }
 
 bool Table::possedeAtoutSuperieur(int joueur, Carte atout) const
@@ -393,6 +512,18 @@ bool Table::possedeCouleur(int joueur, int couleur) const
         }
     }
     return false;
+}
+
+int Table::pointsCoinche(bool attaque)
+{
+	if (attaque)
+	{
+		return (montantAnnonce + 160 * (coinche > 0))*(1 + (coinche == 2));
+	}
+	else
+	{
+		return (160 + montantAnnonce * (coinche > 0))*(1 + (coinche == 2));
+	}
 }
 
 int annonceToId(string str)
@@ -431,4 +562,25 @@ int annonceToId(string str)
 		return 7;
 	}
     return -1;
+}
+
+string idToAnnonce(int id)
+{
+	switch (id)
+	{
+	case 0:
+		return "Carreau";
+	case 1:
+		return "Coeur";
+	case 2:
+		return "Pique";
+	case 3:
+		return "Trefle";
+	case 4:
+		return "Sans Atout";
+	case 5:
+		return "Tout Atout";
+	default:
+		return "Id non valide.";
+	}
 }

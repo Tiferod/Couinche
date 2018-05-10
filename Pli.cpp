@@ -4,11 +4,11 @@
 
 using namespace std;
 
-Pli::Pli() : joueurDebut(0)
+Pli::Pli() : joueurDebut(0), points(0)
 {
 
 }
-Pli::Pli(int joueur)
+Pli::Pli(int joueur) : points(0)
 {
     if (joueur < 0 || joueur > 3)
     {
@@ -120,6 +120,13 @@ int Pli::getJoueurMaitre() const
         cout<<"Ce pli ne contient aucune carte." << endl;
         return -1;
     }
+}
+
+Pli Pli::setDixDeDer()
+{
+	dixDeDer = true;
+	points += 10;
+	return *this;
 }
 
 std::ostream& operator<<(std::ostream& os, const Pli& pli)

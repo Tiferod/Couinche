@@ -18,6 +18,7 @@ public:
 	int getPoints() const;
     int getCouleurAnnoncee() const;
     int* getPointeur() const;
+	bool isAtout();
     Carte setCouleurAnnoncee(int& couleur);
 
 private:
@@ -29,6 +30,9 @@ private:
 
     int *couleurAnnoncee;
 };
+
+std::string valeurCouleurToNom(int valeur, int couleur);
+int valeurToPoints(int valeur);
 
 int idToOrdre(int n, bool atout);
 bool comparaisonParId(Carte c1, Carte c2);

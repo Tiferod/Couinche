@@ -21,11 +21,13 @@ public:
     Carte getDerniereCarte() const;
     Carte getCarteMaitre() const;
     int getJoueurMaitre() const;
+	Pli setDixDeDer();
 
 private:
     int joueurDebut;
     std::vector<Carte> cartes;
 	int points;
+	bool dixDeDer;
 };
 
 std::ostream& operator<<(std::ostream& os, const Pli& pli);

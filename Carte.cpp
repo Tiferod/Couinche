@@ -23,35 +23,9 @@ Carte::Carte(int id1)
         else
         {
             valeur = id % 8;
-            switch(valeur) {
-				case 0: nom = "7 "; points = 0;
-                break;
-                case 1 : nom = "8 "; points = 0;
-                break;
-                case 2 : nom = "9 "; points = 0;
-                break;
-                case 3 : nom = "10 "; points = 10;
-                break;
-                case 4 : nom = "V "; points = 2;
-                break;
-                case 5 : nom = "D "; points = 3;
-                break;
-                case 6 : nom = "R "; points = 4;
-                break;
-                case 7 : nom = "A "; points = 11;
-                break;
-            }
-            couleur = id / 8;
-            switch(couleur) {
-                case 0 : nom += "CA";
-                break;
-                case 1 : nom += "CO";
-                break;
-                case 2 : nom += "PI";
-                break;
-                case 3 : nom += "TR";
-                break;
-            }
+			couleur = id / 8;
+			nom = valeurCouleurToNom(valeur, couleur);
+			points = valeurToPoints(valeur);
         }
     }
 }
@@ -59,7 +33,9 @@ Carte::Carte(int valeur1, int couleur1) : valeur(valeur1), couleur(couleur1)
 {
     if (valeur == -1 && couleur == -1)
     {
-        Carte(32);
+		id = 32;
+		nom = "Joker";
+		points = -1;
     }
     else
     {
@@ -71,14 +47,19 @@ Carte::Carte(int valeur1, int couleur1) : valeur(valeur1), couleur(couleur1)
         {
         cout<<"La couleur " << couleur1 << " n'est pas valide pour une carte." << endl;
         }
-        Carte(valeur1 + 4*couleur1);
+		id = valeur1 + 4 * couleur1;
+		nom = valeurCouleurToNom(valeur, couleur);
+		points = valeurToPoints(valeur);
     }
 }
 Carte::Carte(std::string nom1) : nom(nom1)
 {
     if (nom1 == "Joker")
     {
-        Carte(32);
+		id = 32;
+		valeur = -1;
+		couleur = -1;
+		points = -1;
     }
     else
     {
@@ -183,27 +164,85 @@ int* Carte::getPointeur() const
 {
     return couleurAnnoncee;
 }
+bool Carte::isAtout()
+{
+	return (*couleurAnnoncee == 5 || couleur == *couleurAnnoncee);
+}
 Carte Carte::setCouleurAnnoncee(int& couleur)
 {
     couleurAnnoncee = &couleur;
-	if (couleur == this->couleur || couleur == 5)
+	bool atout = couleur == this->couleur || couleur == 5;
+	if (valeur == 2)
 	{
-		if (valeur == 2)
-		{
-			points = 14;
-		}
-		else if (valeur == 3)
-		{
-			points = 20;
-		}
+		points = 14 * (atout);
 	}
-	else if (couleur == 4 && valeur == 7)
+	else if (valeur == 4)
 	{
-		points = 19;
+		points = 2 + 18 * (atout);
+	}
+	else if (valeur == 7)
+	{
+		points = 11 + 8 * (couleur == 4);
 	}
     return *this;
 }
 
+string valeurCouleurToNom(int valeur, int couleur)
+{
+	string nom = "";
+	switch (valeur) {
+	case 0: nom = "7 ";
+		break;
+	case 1: nom = "8 ";
+		break;
+	case 2: nom = "9 ";
+		break;
+	case 3: nom = "10 ";
+		break;
+	case 4: nom = "V ";
+		break;
+	case 5: nom = "D ";
+		break;
+	case 6: nom = "R ";
+		break;
+	case 7: nom = "A ";
+		break;
+	}
+	switch (couleur) {
+	case 0: nom += "CA";
+		break;
+	case 1: nom += "CO";
+		break;
+	case 2: nom += "PI";
+		break;
+	case 3: nom += "TR";
+		break;
+	}
+	return nom;
+}
+int valeurToPoints(int valeur)
+{
+	int points = 0;
+	switch (valeur) {
+	case 0: points = 0;
+		break;
+	case 1: points = 0;
+		break;
+	case 2: points = 0;
+		break;
+	case 3: points = 10;
+		break;
+	case 4: points = 2;
+		break;
+	case 5: points = 3;
+		break;
+	case 6: points = 4;
+		break;
+	case 7: points = 11;
+		break;
+	}
+	return points;
+}
 int idToOrdre(int n, bool atout)
 {
     int m = n % 8;
